@@ -27,7 +27,7 @@
         "@google-cloud/bigquery": "^7.5.0",
         "@google-cloud/resource-manager": "^5.1.0",
         "@google-cloud/storage": "^7.7.0",
-        "@google-cloud/tasks": "5.1.1",
+        "@google-cloud/tasks": "^3.2.0",
         "axios": "^1.6.7",
         "body-parser": "^1.20.2",
         "dayjs": "^1.11.10",
