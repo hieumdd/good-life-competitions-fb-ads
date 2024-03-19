@@ -8,16 +8,12 @@ import { createWriteStream } from '../google-cloud/storage.service';
 import { FacebookRequestOptions } from './pipeline.request.dto';
 
 const validateTransform = (schema: Joi.Schema) => {
-    return new Transform({
-        objectMode: true,
-        transform: (row, _, callback) => {
-            const batchedAt = { _batched_at: dayjs().utc().toISOString() };
-            schema
-                .validateAsync(row)
-                .then((value) => callback(null, { ...value, ...batchedAt }))
-                .catch((error) => callback(error));
-        },
-    });
+    return async function* (rows: any) {
+        for await (const row of rows) {
+            const value = await schema.validateAsync(row);
+            yield { ...value, _batched_at: dayjs().utc().toISOString() };
+        }
+    };
 };
 
 export type RunPipelineOptions = FacebookRequestOptions & { bucketName: string };
@@ -34,20 +30,15 @@ export const createInsightsPipeline = (options: CreateInsightsPipelineConfig) =>
 
     const standardize = validateTransform(validationSchema);
 
-    const grouping = (() => {
+    const grouping = async function* (rows: any) {
         const state: Record<string, object[]> = {};
-        return new Transform({
-            objectMode: true,
-            transform(row, _, callback) {
-                state[row.date_start] = [...(state[row.date_start] ?? []), row];
-                callback();
-            },
-            flush(callback) {
-                Object.entries(state).forEach((rows) => this.push(rows));
-                callback();
-            },
-        });
-    })();
+        for await (const row of rows) {
+            state[row.date_start] = [...(state[row.date_start] ?? []), row];
+        }
+        for (const entry of Object.entries(state)) {
+            yield entry;
+        }
+    };
 
     const partitionedWrite = (bucketName: string, fileName: (key: string) => string) => {
         return new Writable({
