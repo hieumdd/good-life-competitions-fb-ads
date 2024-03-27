@@ -97,10 +97,10 @@ export const AdsInsights = createInsightsPipeline({
     ],
 });
 
-export const ADSET_HOURLY_INSIGHTS = createInsightsPipeline({
-    name: 'AdSetHourlyInsights',
+export const ADS_HOURLY_INSIGHTS = createInsightsPipeline({
+    name: 'AdsHourlyInsights',
     extractStream: getInsightsStream({
-        level: 'adset',
+        level: 'ad',
         breakdowns: 'hourly_stats_aggregated_by_advertiser_time_zone',
         fields: [
             'date_start',
@@ -111,10 +111,10 @@ export const ADSET_HOURLY_INSIGHTS = createInsightsPipeline({
             'campaign_name',
             'adset_id',
             'adset_name',
+            'ad_id',
+            'ad_name',
             'action_values',
             'actions',
-            'conversion_values',
-            'conversions',
             'clicks',
             'impressions',
             'reach',
@@ -131,10 +131,10 @@ export const ADSET_HOURLY_INSIGHTS = createInsightsPipeline({
         campaign_name: Joi.string(),
         adset_id: Joi.string(),
         adset_name: Joi.string(),
+        ad_id: Joi.string(),
+        ad_name: Joi.string(),
         action_values: actionBreakdownSchema.optional(),
         actions: actionBreakdownSchema.optional(),
-        conversion_values: actionBreakdownSchema.optional(),
-        conversions: actionBreakdownSchema.optional(),
         clicks: Joi.number().optional(),
         impressions: Joi.number().optional(),
         reach: Joi.number().optional(),
@@ -150,6 +150,8 @@ export const ADSET_HOURLY_INSIGHTS = createInsightsPipeline({
         { name: 'campaign_name', type: 'STRING' },
         { name: 'adset_id', type: 'NUMERIC' },
         { name: 'adset_name', type: 'STRING' },
+        { name: 'ad_id', type: 'NUMERIC' },
+        { name: 'ad_name', type: 'STRING' },
         {
             name: 'action_values',
             type: 'RECORD',
@@ -161,24 +163,6 @@ export const ADSET_HOURLY_INSIGHTS = createInsightsPipeline({
         },
         {
             name: 'actions',
-            type: 'RECORD',
-            mode: 'REPEATED',
-            fields: [
-                { name: 'action_type', type: 'STRING' },
-                { name: 'value', type: 'NUMERIC' },
-            ],
-        },
-        {
-            name: 'conversion_values',
-            type: 'RECORD',
-            mode: 'REPEATED',
-            fields: [
-                { name: 'action_type', type: 'STRING' },
-                { name: 'value', type: 'NUMERIC' },
-            ],
-        },
-        {
-            name: 'conversions',
             type: 'RECORD',
             mode: 'REPEATED',
             fields: [
